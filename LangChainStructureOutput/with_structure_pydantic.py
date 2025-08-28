@@ -1,7 +1,7 @@
 from langchain_huggingface import ChatHuggingFace, HuggingFacePipeline
 import os
-from typing import TypedDict, Annotated, Optional
-
+from typing import TypedDict, Annotated, Optional, Literal
+from pydantic import BaseModel, Field
 
 os.environ["HF_HOME"] = 'D:/huggingface_cache'
 
@@ -16,12 +16,14 @@ llm = HuggingFacePipeline.from_model_id(
 model = ChatHuggingFace(llm = llm)
 
 #Schema
-class Review(TypedDict) :
-    key_themes = Annotated[list[str], "Write down all the key themes discussed in the review in a list"]
-    summary: Annotated[str, "A brief summary of the review"]
-    sentiment: Annotated[str, "Return sentiment of the review either negative, positive or neutral"]
-    pros: Annotated[Optional[list[str]], "Write down all the pros inside a list"]
-    cons: Annotated[Optional[list[str]], "Write down all the cons inside a list"]
+class Review(BaseModel) :
+    key_themes: list[str] = Field(description="Write down all the key themes discussed in the review in a list")
+    summary: str = Field(description="A brief summary of the review")
+    sentiment: Literal["pos", "neg"] = Field(description="Return sentiment of the review either negative, positive or neutral")
+    pros: Optional[list[str]] = Field(default=None, description="Write down all the pros inside a list")
+    cons: Optional[list[str]] = Field(default=None, description="Write down all the cons inside a list")
+    name: Optional[str] = Field(default=None, description="Write the name of the reviewer")
+
 
 structured_model = model.with_structured_output(Review)
 
@@ -30,4 +32,4 @@ result = structured_model.invoke("""Great! I was a bit weary as I had previously
              The phone was in good condition with no dings or scratches, shipping was quick, and I paid half the cost vs. had I purchased new.""")
 
 
-print(type(result))
+print(result)
