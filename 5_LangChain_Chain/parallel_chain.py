@@ -5,7 +5,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain.schema.runnable import RunnableParallel
 from huggingface_hub import login
-#login(token="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")
+
 
 os.environ["HF_HOME"] = 'D:/huggingface_cache'
 
