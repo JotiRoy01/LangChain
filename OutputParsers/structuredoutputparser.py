@@ -3,7 +3,8 @@ import os
 from typing import TypedDict, Annotated, Optional, Literal
 from pydantic import BaseModel, Field
 from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.output_parsers import StrOutputParser
+from langchain.output_parsers import StructuredOutputParser, ResponseSchema
 
 os.environ["HF_HOME"] = 'D:/huggingface_cache'
 
@@ -17,27 +18,26 @@ llm = HuggingFacePipeline.from_model_id(
 )
 model = ChatHuggingFace(llm = llm)
 
-parser = JsonOutputParser()
-# template = PromptTemplate(
-#     template="Give me the name, age and city of a fictional person \n {format_instruction}",
-#     input_variables=[],
-#     partial_variables={"format_instruction":parser.get_format_instructions()}
-# )
+schema = [
+    ResponseSchema(name="fact_1",description="Fact 1 about the topic"),
+    ResponseSchema(name="fact_2",description="Fact 2 about the topic"),
+    ResponseSchema(name="fact_3",description="Fact 3 about the topic"),
+]
+
+parser = StructuredOutputParser.from_response_schemas(schema)
 
 template = PromptTemplate(
-    template="Give me 5 facts about {topic}\n Respond ONLY with a valid JSON object as specified:\n{format_instruction}",
+    template="Give 3 fact about {topic} \n {format_instruction}",
     input_variables=["topic"],
     partial_variables={"format_instruction":parser.get_format_instructions()}
+
 )
-
-# prompt = template.format()
-
-# result = model.invoke(prompt)
-# final_result = parser.parse(result.content)
-
-# chain = template | model | parser
-# result = chain.invoke({})
 
 chain = template | model | parser
 result = chain.invoke({"topic":"black hole"})
+
+# prompt = template.invoke({"topic":"black hole"})
+
+# result = model.invoke(prompt)
+#final_result = parser.parse(result.content)
 print(result)
