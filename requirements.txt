@@ -19,3 +19,6 @@ numpy
 scikit-learn
 torch
 grandalf
+langchain_community
+beautifulsoup4
+pypdf
